@@ -2,7 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const qrcode = require('qrcode');
 const { encode } = require('base62');
-;
 const socketIo = require('socket.io');
 const fs = require('fs');
 const app = express();
