@@ -5,8 +5,6 @@ const { encode } = require('base62');
 const socketIo = require('socket.io');
 const fs = require('fs');
 const cors = require('cors');
-
-
 const app = express();
 
 
@@ -14,10 +12,8 @@ const io = socketIo();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('public'));
-
 const urlDatabase = {};
 let idCounter = 1;
-
 // Function to generate a 5-letter encoded short URL
 function generateShortUrl() {
     return encode(idCounter++, { characters: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz' }).slice(0, 5);
@@ -27,7 +23,6 @@ const corsOptions = {
     origin: 'https://shortenurl-jp.onrender.com/', // Specify the allowed origin
     credentials: true, // Indicate that cookies should be included in cross-site requests
 };
-
 app.use(cors(corsOptions));
  
   // Define a new route to serve usage data and URL list
@@ -61,7 +56,6 @@ app.get('/api/usage', (req, res) => {
   
 // User tracking by IP address and daily URL count
 const userTracking = {};
-
 // Serve the dynamic dashboard
 app.get('/dashboard', (req, res) => {
     // Read the dashboard.html file
@@ -74,26 +68,18 @@ app.get('/dashboard', (req, res) => {
         }
     });
 });
-
-
-
-
 // Create Short URL with Custom Short Link and Timestamp
 app.post('/api/shorten', async (req, res) => {
     const { originalUrl, customShortUrl } = req.body;
     const userIp = req.ip;
-
     // Check if the user has reached the daily limit (5 URLs)
     if (!userTracking[userIp]) {
         userTracking[userIp] = [];
     }
-
     if (userTracking[userIp].length >= 5) {
         return res.status(400).json({ error: 'Daily limit exceeded. You can only create 5 URLs per day.' });
     }
-
     let shortUrl;
-
     if (customShortUrl) {
         // Check if custom short URL already exists
         if (urlDatabase.hasOwnProperty(customShortUrl)) {
@@ -104,39 +90,31 @@ app.post('/api/shorten', async (req, res) => {
         // Generate a new 5-letter short URL using base62 encoding
         shortUrl = generateShortUrl();
     }
-
     const urlData = {
         originalUrl,
         createdAt: new Date(),
         usageCount: 0,
         createdBy: userIp, // Track the user who created the URL
     };
-
     urlDatabase[shortUrl] = urlData;
     userTracking[userIp].push(shortUrl); // Track URL creation for the user
-
     // Emit a 'urlCreated' event with the new URL data
     io.emit('urlCreated', urlData);
-
     res.json({
         originalUrl,
         shortenedUrl: `http://localhost:3000/${shortUrl}`,
         customShortUrl: customShortUrl || 'None',
     });
 });
-
 // Resolve Short URL
 app.get('/:shortUrl', async (req, res) => {
     const { shortUrl } = req.params;
-
     // Check if shortUrl exists in your database
     if (urlDatabase.hasOwnProperty(shortUrl)) {
         const { originalUrl } = urlDatabase[shortUrl];
-
         urlDatabase[shortUrl].usageCount++; // Update usage count
         return res.redirect(originalUrl); // Redirect to the original URL
     }
-
     // If shortUrl is not found, return a "Not Found" error
     return res.status(404).send(`<!DOCTYPE html>
     <html lang="en">
@@ -186,21 +164,15 @@ app.get('/:shortUrl', async (req, res) => {
     </body>
     </html>`);
     });
-
-
-
 // Route to handle QR code generation
 app.get('/:shortUrl/qrcode', async (req, res) => {
     const { shortUrl } = req.params;
-
     if (shortUrl === 'None') {
         // Handle the case where the custom short URL is 'None'
         return res.status(404).se({ error: 'Short URL not found' });
     }
-
     if (urlDatabase.hasOwnProperty(shortUrl)) {
         const shortenedUrl = `https://shortenurl-jp.onrender.com/${shortUrl}`;
-
         // Generate QR code for the shortened URL
         try {
             const qrCodeData = await qrcode.toDataURL(shortenedUrl);
@@ -225,34 +197,28 @@ app.get('/:shortUrl/qrcode', async (req, res) => {
                     font-family: Arial, sans-serif;
                     text-align: center;
                 }
-
                 .error-container {
                     padding: 100px 0;
                 }
-
                 .error-heading {
                     font-size: 72px;
                     color: #343a40;
                     margin-bottom: 20px;
                 }
-
                 .error-message {
                     font-size: 24px;
                     color: #6c757d;
                     margin-bottom: 40px;
                 }
-
                 /* Additional CSS for custom styling */
                 .container {
                     max-width: 600px;
                     margin: 0 auto;
                 }
-
                 .btn-primary {
                     background-color: #007bff;
                     border-color: #007bff;
                 }
-
                 .btn-primary:hover {
                     background-color: #0056b3;
                     border-color: #0056b3;
@@ -270,10 +236,8 @@ app.get('/:shortUrl/qrcode', async (req, res) => {
         </body>
         </html>
     `);
-
     }
 });
-
 // Get URLs created by the user
 app.get('/api/urls/user/:userIp', (req, res) => {
     const { userIp } = req.params;
@@ -286,7 +250,6 @@ app.get('/api/urls/user/:userIp', (req, res) => {
         }));
     res.json(userUrls);
 });
-
 setInterval(() => {
     const analyticsData = {
         totalUrls: Object.keys(urlDatabase).length,
@@ -294,7 +257,6 @@ setInterval(() => {
     };
     io.emit('realtimeData', analyticsData);
 }, 5000); // Emit data every 5 seconds
-
 app.get('/api/urls/user/:userIp', (req, res) => {
   const { userIp } = req.params;
   const userUrls = Object.keys(urlDatabase)
@@ -306,13 +268,11 @@ app.get('/api/urls/user/:userIp', (req, res) => {
     }));
   res.json(userUrls);
 });
-
 app.use((req, res, next) => {
   const userIp = req.ip;
   req.userIp = userIp;
   next();
 });
-
 // Socket.io event listeners can be added here
 // Fetch and send the URL list data
 app.get('/api/urllist-data', (req, res) => {
@@ -324,11 +284,9 @@ app.get('/api/urllist-data', (req, res) => {
             createdAt,
         };
     });
-
     // Send the URL list data as JSON
     res.json(urlData);
 });
-
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); // Replace '*' with the allowed origin(s) if needed
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -342,6 +300,3 @@ app.use((req, res, next) => {
   
     next();
   });
-   
-
-
