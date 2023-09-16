@@ -4,12 +4,12 @@ const qrcode = require('qrcode');
 const { encode } = require('base62');
 const socketIo = require('socket.io');
 const fs = require('fs');
-const app = express();
-
-const io = socketIo(server);
 const cors = require('cors');
 
+const app = express();
+const server = require('http').createServer(app); // Create an HTTP server
 
+const io = socketIo(server);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('public'));
