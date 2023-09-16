@@ -2,11 +2,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const qrcode = require('qrcode');
 const { encode } = require('base62');
-const http = require('http');
+;
 const socketIo = require('socket.io');
 const fs = require('fs');
 const app = express();
-const server = http.createServer(app);
+
 const io = socketIo(server);
 const cors = require('cors');
 
@@ -199,7 +199,7 @@ app.get('/:shortUrl/qrcode', async (req, res) => {
     }
 
     if (urlDatabase.hasOwnProperty(shortUrl)) {
-        const shortenedUrl = `http://localhost:3000/${shortUrl}`;
+        const shortenedUrl = `https://shortenurl-jp.onrender.com/${shortUrl}`;
 
         // Generate QR code for the shortened URL
         try {
