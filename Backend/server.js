@@ -7,9 +7,9 @@ const fs = require('fs');
 const cors = require('cors');
 
 const app = express();
-const server = require('http').createServer(app); // Create an HTTP server
 
-const io = socketIo(server);
+
+const io = socketIo();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('public'));
