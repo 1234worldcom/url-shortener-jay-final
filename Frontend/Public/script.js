@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   shortenForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const apiUrl = 'http://localhost:3000/api/shorten'; // Define your API URL here
+    const apiUrl = 'https://shortenurl-jp.onrender.com/api/shorten'; // Define your API URL here
     const originalUrl = document.getElementById('originalUrl').value;
     const customShortUrl = document.getElementById('customShortUrl').value;
 
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mode: 'cors', // Set the mode to 'cors' to handle CORS
         headers: {
           'Content-Type': 'application/json',
-          'Origin': 'http://127.0.0.1:5501' // Specify your origin here
+          'Origin': 'https://short-url-js.onrender.com/' // Specify your origin here
         },
         body: JSON.stringify({
           originalUrl,
